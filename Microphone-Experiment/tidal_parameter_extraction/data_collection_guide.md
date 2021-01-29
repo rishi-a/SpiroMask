@@ -32,6 +32,7 @@ Data will start recording when you press Enter.
 
 After a lap is completed press Ctrl-C to stop recording
 you can see the plot, refer to the plots in "fig/" folder, this is what the plots should look like.
-Save the file with corresponding save format.
 
-Thanks!
+Save the file( write "y" to accept or "n" to reject) with corresponding save format.
+
+Thanks!	
