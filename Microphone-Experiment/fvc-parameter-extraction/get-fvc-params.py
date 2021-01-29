@@ -8,10 +8,17 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+import sys
+
+if sys.argv[1] == 'c':
+	mypath="clothData/"
+else:
+	mypath="n95Data/"
+
 
 #script for reading files from json folder
 
-mypath="jsonDataRohit/"
+#mypath="jsonDataRohit/"
 (_, _, filenames) = next(os.walk(mypath))
 
 rPEF = []
@@ -94,4 +101,6 @@ rPFT = pd.DataFrame(
      'rFEV1': rFEV1,
      'rFVC': rFVC
     })
-rPFT.to_csv('rPFT.csv')
+
+#print("Done Reading files in", mypath[:len(mypath)-1])
+rPFT.to_csv(mypath[:len(mypath)-1]+'-rPFT.csv')
