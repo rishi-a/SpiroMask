@@ -294,7 +294,7 @@ def get_parameters(file):
     exhalation_sigs = []
     
     for i in range(len(start)-1):
-        if int(stop[i])-int(start[i]) >= samplerate/2:
+        if int(stop[i])-int(start[i]) >= samplerate/2 :
             exhalation_tups.append([start[i]/samplerate,stop[i]/samplerate])
             exhalation_sigs.append(audio[start[i]:stop[i]])
     
@@ -302,18 +302,21 @@ def get_parameters(file):
     start = 0
     for i in (exhalation_tups):
         if start==0:
-            if i[0]-start>0.8:
+            if i[0]-start>0.8 and i[0]-start<3.5 :
                 inhalation_tups.append((start,i[0]))
-                start = i[1]
         else:
-            inhalation_tups.append((start,i[0]))
-            start = i[1]
-            
+            if i[0]-start>0.8 and i[0]-start<3.5   :
+                inhalation_tups.append((start,i[0]))
+        start = i[1]
+                
     #ridal volume estimates
     tidal_vol_list = []
     for sigs in exhalation_sigs:
         tidal_vol_list.append(get_est_tidal_volume(sigs,samplerate))            
-    
+
+    print([i[1]-i[0] for i in inhalation_tups])
+    print([i[1]-i[0] for i in exhalation_tups])
+        
     Te = sum([i[1]-i[0] for i in exhalation_tups])/len(exhalation_tups)
     Ti = sum([i[1]-i[0] for i in inhalation_tups])/len(inhalation_tups)
     Rf = 60/(Ti+Te)  ## no. of breaths per minute
@@ -324,6 +327,15 @@ def preprocess_file(file):
     sig, fs = librosa.load(file, sr=5000) # Downsample 44.1kHz to 8kHz
     y = butter_highpass_filter(sig, 40 ,fs, 4) 
     write(file,fs,y)
+
+    duration = len(sig)/fs
+    t = np.arange(0,duration,1/fs)
+    fig,ax =  plt.subplots(2,2)
+    ax[0][0].plot(t,sig,color='red')
+    ax[0][1].plot(t,y,color='black')   
+    # fig.grid(True)
+    plt.savefig("./fig/{0}.png".format(file.split("/")[-1]))
+
     return file
 
 def convert_txt_to_audio(file):
@@ -337,3 +349,15 @@ def convert_txt_to_audio(file):
     f = "".join(file.split(".")[:-1]+[".wav"])
     write(f,int(samplerate),sig.to_numpy())
     return f
+
+def convert_txt_to_audio_folder(folder):
+    types = (folder + os.sep + '*.txt',)  # the tuple of file types
+    files_list = []
+    for files in types:
+        files_list.extend(glob.glob(files))
+
+    for f in files_list:
+        convert_txt_to_audio(f)
+
+
+    
