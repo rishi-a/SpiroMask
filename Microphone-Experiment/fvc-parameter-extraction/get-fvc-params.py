@@ -41,9 +41,9 @@ for file in filenames:
     fs = 16000
     x = x/np.max(np.abs(x))
     #detect the starting point of FVC
-    fvcStartIndex = np.where(x>0.5)
-    #move back 1 second from the point FVC started
-    x = x[fvcStartIndex[0][0]-1700:]
+    fvcStartIndex = np.where(x>=0.50)
+    #move back 1 second from the point FVC started and go till 4 seconds
+    x = x[fvcStartIndex[0][0]-5000:fvcStartIndex[0][0]-5000+56000]
     t = np.arange(0,len(x))/fs
     
     plt.subplot(2, 2, 2)
@@ -56,17 +56,19 @@ for file in filenames:
     ax = signal.hilbert(x)
     envelope_hat = np.abs(ax)
     #filter the Hilbert envelope
-    nyq_rate = fs / 2.0
+    nyq_rate = fs / 1.0
     width = 1.0/nyq_rate # 5 Hz filter transition width.
     ripple_db = 10.0 # stop band attenuation
     fL_hz = 10
     N, beta = signal.kaiserord(ripple_db, width)
     taps = signal.firwin(N, fL_hz/nyq_rate, window=('kaiser', beta))
     envelope_hat_filt = signal.filtfilt(taps, 1,envelope_hat)
+
+    envelope_hat_filt_normalized = envelope_hat_filt/np.sum(envelope_hat_filt)
     
     #Corresponds to PEF
-    rPEF.append(20*envelope_hat_filt.max())
-    print("Raw PEF = ",20*envelope_hat_filt.max())
+    rPEF.append(100000*envelope_hat_filt_normalized.max())
+    print("Raw PEF = ",100000*envelope_hat_filt_normalized.max())
     
     #take cumsum of flow and then normalize
     estdVolume = np.cumsum(envelope_hat_filt)
@@ -91,8 +93,10 @@ for file in filenames:
     plt.xlabel('Estimated Volume')
     plt.ylabel('Estimated Flow')
     
-    
-    plt.savefig('plots/'+file+'plots.png', bbox_inches='tight')
+    if sys.argv[1] == 'c':
+        plt.savefig('clothplots/'+file+'plots.png', bbox_inches='tight')
+    else:
+        plt.savefig('n95plots/'+file+'plots.png', bbox_inches='tight')
 
 #save the data
 rPFT = pd.DataFrame(
