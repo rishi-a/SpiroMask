@@ -12,6 +12,8 @@ import sys
 
 if sys.argv[1] == 'c':
 	mypath="clothData/"
+elif sys.argv[1] == 's':
+    mypath = "sensorPositionData/"
 else:
 	mypath="n95Data/"
 
@@ -95,6 +97,8 @@ for file in filenames:
     
     if sys.argv[1] == 'c':
         plt.savefig('clothplots/'+file+'plots.png', bbox_inches='tight')
+    elif sys.argv[1] == 's':
+        plt.savefig('sensorPositionPlots/'+file+'plots.png', bbox_inches='tight')
     else:
         plt.savefig('n95plots/'+file+'plots.png', bbox_inches='tight')
 
