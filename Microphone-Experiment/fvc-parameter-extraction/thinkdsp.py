@@ -133,7 +133,7 @@ def read_json(filepath="something.json"):
     x = x/np.max(np.abs(x))
     x = x-x.mean()
     fvcStartIndex = np.where(x>=0.50)
-    x = x[fvcStartIndex[0][0]-5000:]
+    x = x[fvcStartIndex[0][0]-5000:fvcStartIndex[0][0]-5000+56000]
     t = np.arange(0,len(x))/fs
     wave = Wave(x, framerate=fs)
     return wave
