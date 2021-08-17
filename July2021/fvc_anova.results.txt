@@ -1,0 +1,14 @@
+Formula: err_fvc ~ sex + age + weight_kg + height_cm + meal + smoking + lung_ailment + past_spirometry + smoking:lung_ailment
+
+                        sum_sq    df         F    PR(>F)
+sex                   0.148818   1.0  2.320857  0.139278
+meal                  0.078641   1.0  1.226435  0.277870
+smoking               0.063834   1.0  0.995502  0.327260
+lung_ailment          0.061914   1.0  0.965569  0.334511
+past_spirometry       0.003487   1.0  0.054376  0.817376
+smoking:lung_ailment  0.015821   1.0  0.246740  0.623400
+age                   0.090802   1.0  1.416082  0.244408
+weight_kg             0.200878   1.0  3.132747  0.088028
+height_cm             0.070628   1.0  1.101463  0.303249
+Residual              1.731293  27.0       NaN       NaN
+
