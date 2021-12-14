@@ -6,14 +6,12 @@
 
 #include <SPI.h>
 #include <SD.h>
+//#include <I2S.h>
 #include <Adafruit_ZeroI2S.h>
-
-//enable/disable the part of code that is involved with SD card actions
-bool SDENABLE = 1;
 
 //audio intake settings.
 #define SAMPLERATE_HZ 8000
-int32_t audiosamples = 128; //128 because 512B/4B = 32B. 512B is what we can write in one block of the SD card. 4B is the size of the variable 
+int32_t audiosamples = 512;
 const int sample_delay = 1000;
 
 // The I2S interface with the Mic using Adafruit Library.
@@ -45,19 +43,15 @@ void setup() {
   pinMode(writeIndicator,OUTPUT);
 
 
-  if(SDENABLE){
-
   //check SD card status
+  /*
   if(!SD.begin(chipSelect)){
     Serial.println("Card failed, or not present");  
     //don't do anything more
     while(1);
   }
   Serial.println("Card Initialised");
-
-  }
-  
-  
+  */
 }
 
 void loop() {
@@ -73,8 +67,8 @@ void loop() {
   int sample=0;
 
   // Read a bunch of samples!!!
-  uint32_t samples[audiosamples];
-  //char charSamples[audiosamples];
+  int32_t samples[audiosamples];
+  char charSamples[audiosamples];
   
   for (int i = 0; i < audiosamples; i++) {
     i2s.read(&left, &right);
@@ -84,35 +78,54 @@ void loop() {
     // convert to 18 bit signed
     sample >>= 14;
     samples[i] = abs(sample);
-    //charSamples[i] = char(abs(sample));
   }
 
-    // Print the values
-    // Dont use the below loop if you are writing to SD card to save time
   for (int i = 0; i < audiosamples; i++) {
-    //Serial.println(charSamples[i]);
     Serial.println(samples[i]);
+    //samples[i] -= meanval;
   }
 
-
-
-
-  if(SDENABLE){
-
-    //store data in SD card;
-    File dataFile = SD.open("datalog.dat",FILE_WRITE);
+  // Calculate mean (avg) over samples
   
-    //if file is available, write to it
-    if(dataFile){
-      dataFile.write((const uint8_t *)&samples, sizeof(samples));
-      dataFile.close();
-      digitalWrite(writeIndicator, HIGH);  
-    }
+  float meanval = 0;
+  for (int i = 0; i < audiosamples; i++) {
+    meanval += samples[i];
+  }
+  meanval /= audiosamples;
 
+  // subtract it from all samples to get a 'normalized' output
+  for (int i = 0; i < audiosamples; i++) {
+    samples[i] -= meanval;
   }
 
-  
+  /*
+  // find the 'peak to peak' max
+  float maxsample, minsample;
+  minsample = 100000;
+  maxsample = -100000;
+    
+  for (int i = 0; i < audiosamples; i++) {
+    minsample = min(minsample, samples[i]);
+    maxsample = max(maxsample, samples[i]);
+  }
+
+  sound = 10 * log(maxsample - minsample);
+  Serial.println(sound);
  
+  //convert audio amplitude to String
+  dataString += String(sound);
   
+
+  //store data in SD card;
+  File dataFile = SD.open("datalog.txt",FILE_WRITE);
+
+  //if file is available, write to it
+  if(dataFile){
+    dataFile.println(dataString);
+    dataFile.close();
+    digitalWrite(writeIndicator, HIGH);  
+  }
+  delay(10); // Let's just process a measurement each 10 micro second.
+  */
 
 }
