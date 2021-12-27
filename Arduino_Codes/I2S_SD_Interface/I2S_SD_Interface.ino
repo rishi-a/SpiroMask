@@ -9,12 +9,11 @@
 #include <Adafruit_ZeroI2S.h>
 
 //enable/disable the part of code that is involved with SD card actions
-bool SDENABLE = 1;
+bool SDENABLE = 0;
 
 //audio intake settings.
 #define SAMPLERATE_HZ 8000
 int32_t audiosamples = 128; //128 because 512B/4B = 32B. 512B is what we can write in one block of the SD card. 4B is the size of the variable 
-const int sample_delay = 1000;
 
 // The I2S interface with the Mic using Adafruit Library.
 Adafruit_ZeroI2S i2s; 
@@ -62,10 +61,9 @@ void setup() {
 
 void loop() {
 
-  String dataString = ""; //this variable will be used to convert audio amplitude to string
 
   // This is a stereo Mic. But we'll only read from LEFT channel
-  digitalWrite(11, LOW);  
+  //digitalWrite(11, LOW);  
 
   float sound;
   int32_t left,right;
@@ -73,26 +71,23 @@ void loop() {
   int sample=0;
 
   // Read a bunch of samples!!!
-  uint32_t samples[audiosamples];
+  int32_t samples[audiosamples];
   //char charSamples[audiosamples];
   
   for (int i = 0; i < audiosamples; i++) {
     i2s.read(&left, &right);
-    delay(1);  // Workaround delay to prevent oversizing the buffer
+    //delay(1);  // Workaround delay to prevent oversizing the buffer
     sample = left;
     //Serial.println(sample);
     // convert to 18 bit signed
-    sample >>= 14;
-    samples[i] = abs(sample);
-    //charSamples[i] = char(abs(sample));
+    //sample >>= 14;
+    //samples[i] = abs(sample);
+    Serial.println(sample);
+    samples[i] = sample;
+    
   }
 
-    // Print the values
-    // Dont use the below loop if you are writing to SD card to save time
-  for (int i = 0; i < audiosamples; i++) {
-    //Serial.println(charSamples[i]);
-    Serial.println(samples[i]);
-  }
+   
 
 
 
