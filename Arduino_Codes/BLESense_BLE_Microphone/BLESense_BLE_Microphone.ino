@@ -123,15 +123,16 @@ void setup() {
 
 void loop() {
   currentTime = millis(); 
-  BLE.poll(1000);
+  BLE.poll(10000);
   while (BLE.connected()) {
     lowPowerBleWait(100); //does this mean that in one second we have 10 data point?
     updateSubscribedCharacteristics();
 
     if((millis()-currentTime)>60000){
-      //delay(60*1000); //sleep for a minute 
+      //NRF_POWER->SYSTEMOFF = 1;
+      delay(60*1000); //sleep for a minute 
       //BLE.end();      //does not make any difference, so its better to keep the connection on
-      lowPowerWait(60*1000);
+      //lowPowerWait(60*1000);
       currentTime = millis(); //get the current time
     }
   }
