@@ -106,16 +106,12 @@ void loop() {
           break; 
         vReal[i] = eCO2;
         vImag[i] = 0;
+        if(i>=50)
+          displayCO2(eCO2); //displays on OLED
         delay(1000);
-        //if (i%2 == 0 && i > 40)
-          //waitText1();
-        //else if(i%2 == 1 && i > 40)
-          //waitText2();
       }
     }
-    if(i == SAMPLES){  //only perform FFT if we have collected enough samples
-      Serial.print("I is");
-      Serial.println(i);
+    if(i == SAMPLES){  //only perform FFT if we have collected enough samples i.e 64 samples
       FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
       FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
       FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
@@ -158,26 +154,20 @@ void greettext(void) {
   display.stopscroll();
 }
 
-void waitText1(void) {
-  
+
+void displayCO2(double val) {
+  char stringOutput[10];
+  String myOLEDdata = "";
+  dtostrf(val,2,2,stringOutput);
+ 
   display.clearDisplay();
 
-  display.setTextSize(1); // Draw 2X-scale text
+  display.setTextSize(3); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(10, 0);
-  display.println(F("Calculating"));
-  display.display();      // Show initial text
-  //delay(100);
-}
-
-void waitText2(void) {
-  
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("Calculating"));
+  display.println(F("eCO2"));
+  display.println(F(stringOutput));
+  //display.println(F("BrPM\n 20"));
   display.display();      // Show initial text
   //delay(100);
 }
@@ -206,7 +196,7 @@ void noRR(void) {
   display.setTextSize(2); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(10, 0);
-  display.println(F("Mask Loose"));
+  display.println(F("Mask\nLoose"));
   display.display();      // Show initial text
   delay(100);
 
