@@ -23,11 +23,12 @@
 /* Includes ---------------------------------------------------------------- */
 #include <smartphone-sensors_inferencing.h>
 #include "camera.h"
+#include "himax.h"
 #include "edge-impulse-sdk/dsp/image/image.hpp"
 
 /* Constant defines -------------------------------------------------------- */
 #define EI_CAMERA_RAW_FRAME_BUFFER_COLS           320
-#define EI_CAMERA_RAW_FRAME_BUFFER_ROWS           320
+#define EI_CAMERA_RAW_FRAME_BUFFER_ROWS           240
 
 // frame buffer allocation options:
 //    - static (default if none below is chosen)
@@ -90,7 +91,10 @@ void ei_printf(const char *format, ...) {
 static bool debug_nn = false; // Set this to true to see e.g. features generated from the raw signal
 static bool is_initialised = false;
 static bool is_ll_initialised = false;
-static CameraClass cam;
+HM01B0 himax;
+static Camera cam(himax);
+FrameBuffer fb;
+
 
 /*
 ** @brief points to the output of the capture
@@ -128,7 +132,7 @@ void setup()
     SDRAM.begin(SDRAM_START_ADDRESS);
 #endif
 
-    if (ei_camera_init()) {
+    if (ei_camera_init() == false) {
         ei_printf("Failed to initialize Camera!\r\n");
     }
     else {
@@ -182,30 +186,35 @@ void loop()
         return;
     }
 
-        // print the predictions
-        ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
-                  result.timing.dsp, result.timing.classification, result.timing.anomaly);
+    // print the predictions
+    ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
+                result.timing.dsp, result.timing.classification, result.timing.anomaly);
 #if EI_CLASSIFIER_OBJECT_DETECTION == 1
-        bool bb_found = result.bounding_boxes[0].value > 0;
-        for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
-            auto bb = result.bounding_boxes[ix];
-            if (bb.value == 0) {
-                continue;
-            }
-
-            ei_printf("    %s (%f) [ x: %u, y: %u, width: %u, height: %u ]\n", bb.label, bb.value, bb.x, bb.y, bb.width, bb.height);
+    bool bb_found = result.bounding_boxes[0].value > 0;
+    for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+        auto bb = result.bounding_boxes[ix];
+        if (bb.value == 0) {
+            continue;
         }
 
-        if (!bb_found) {
-            ei_printf("    No objects found\n");
-        }
+        ei_printf("    %s (", bb.label);
+        ei_printf_float(bb.value);
+        ei_printf(") [ x: %u, y: %u, width: %u, height: %u ]\n", bb.x, bb.y, bb.width, bb.height);
+    }
+
+    if (!bb_found) {
+        ei_printf("    No objects found\n");
+    }
 #else
-        for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
-            ei_printf("    %s: %.5f\n", result.classification[ix].label,
-                                        result.classification[ix].value);
-        }
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+        ei_printf("    %s: ", result.classification[ix].label);
+        ei_printf_float(result.classification[ix].value);
+        ei_printf("\n");
+    }
 #if EI_CLASSIFIER_HAS_ANOMALY == 1
-        ei_printf("    anomaly score: %.3f\n", result.anomaly);
+    ei_printf("    anomaly score: ");
+    ei_printf_float(result.anomaly);
+    ei_printf("\n");
 #endif
 #endif
 }
@@ -219,8 +228,7 @@ bool ei_camera_init(void) {
     if (is_initialised) return true;
 
     if (is_ll_initialised == false) {
-        int r = cam.begin(CAMERA_R320x320, 30);
-        if (r != 0) {
+        if (!cam.begin(CAMERA_R320x240, CAMERA_GRAYSCALE, 30)) {
             ei_printf("ERR: Failed to initialise camera\r\n");
             return false;
         }
@@ -247,6 +255,7 @@ bool ei_camera_init(void) {
     ei_camera_frame_buffer = (uint8_t *)ALIGN_PTR((uintptr_t)ei_camera_frame_mem, 32);
 #endif
 
+    fb.setBuffer(ei_camera_frame_buffer);
     is_initialised = true;
 
     return true;
@@ -286,7 +295,7 @@ bool ei_camera_capture(uint32_t img_width, uint32_t img_height, uint8_t *out_buf
         return false;
     }
 
-    int snapshot_response = cam.grab(ei_camera_frame_buffer);
+    int snapshot_response = cam.grabFrame(fb, 3000);
     if (snapshot_response != 0) {
         ei_printf("ERR: Failed to get snapshot (%d)\r\n", snapshot_response);
         return false;
@@ -416,7 +425,6 @@ int calculate_resize_dimensions(uint32_t out_width, uint32_t out_height, uint32_
         {200, 150},
         {256, 192},
         {320, 240},
-        {320, 320},
     };
 
     // (default) conditions

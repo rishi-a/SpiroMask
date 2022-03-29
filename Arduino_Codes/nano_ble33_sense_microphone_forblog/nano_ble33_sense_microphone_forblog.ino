@@ -70,11 +70,8 @@ void setup()
         ei_printf("ERR: Failed to setup audio sampling\r\n");
         return;
     }
-
     lowPower();
 }
-
-
 
 /**
  * @brief      Arduino main function. Runs the inferencing loop.
@@ -241,22 +238,24 @@ static void microphone_inference_end(void)
 #error "Invalid model for current sensor."
 #endif
 
+
+
 void lowPower()
 {
     // Disable UARTE0 which is initially enabled by the bootloader
-    nrf_uarte_task_trigger(NRF_UARTE0, NRF_UARTE_TASK_STOPRX); 
-    while (!nrf_uarte_event_check(NRF_UARTE0, NRF_UARTE_EVENT_RXTO)) ; 
-    NRF_UARTE0->ENABLE = 0; 
-    NRF_UART0->ENABLE = 0; 
+    //nrf_uarte_task_trigger(NRF_UARTE0, NRF_UARTE_TASK_STOPRX);
+    //while (!nrf_uarte_event_check(NRF_UARTE0, NRF_UARTE_EVENT_RXTO)) ;
+    //NRF_UARTE0->ENABLE = 0;
+    //NRF_UART0->ENABLE = 0;
 
     // Enable DCDC
     nrf_power_dcdcen_set(true);
 
     // Turn off LED_BUILTIN
-    digitalWrite(LED_BUILTIN, LOW);
+    //digitalWrite(LED_BUILTIN, LOW);
 
     //Turn off power led
-    digitalWrite(LED_PWR, LOW);
+    //digitalWrite(LED_PWR, LOW);
 
-    digitalWrite(PIN_ENABLE_I2C_PULLUP, LOW); // PIN_ENABLE_I2C_PULLUP set to LOW:
+    //digitalWrite(PIN_ENABLE_I2C_PULLUP, LOW); // PIN_ENABLE_I2C_PULLUP set to LOW:
 }

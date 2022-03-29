@@ -47,7 +47,7 @@
 #define EI_CLASSIFIER_PROJECT_ID                 36356
 #define EI_CLASSIFIER_PROJECT_OWNER              "Rishi"
 #define EI_CLASSIFIER_PROJECT_NAME               "smartphone-sensors"
-#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     2
+#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     5
 #define EI_CLASSIFIER_NN_INPUT_FRAME_SIZE        650
 #define EI_CLASSIFIER_RAW_SAMPLE_COUNT           16000
 #define EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME      1
@@ -81,7 +81,7 @@
 #define EI_CLASSIFIER_INFERENCING_ENGINE            EI_CLASSIFIER_TFLITE
 
 
-#define EI_CLASSIFIER_COMPILED                      1
+#define EI_CLASSIFIER_COMPILED                      0
 #define EI_CLASSIFIER_HAS_TFLITE_OPS_RESOLVER       1
 
 
