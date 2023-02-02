@@ -1,3 +1,0 @@
-020 indoor audio file is not proper
-025 outdoor audio file is not proper
-028 spoke rarely during the experiment mostly during the switch between activities.

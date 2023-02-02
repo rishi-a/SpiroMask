@@ -1,5 +1,0 @@
-# PCA9554
-
-## License
-
-[PCA9554 - MIT](LICENSE)
